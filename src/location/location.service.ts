@@ -41,7 +41,7 @@ export class LocationService {
       return await this.locationRepository.find({
         relations: {
           owner: true,
-          favBy: true,
+          favCharacters: true,
         },
       });
     } catch (error) {
@@ -55,7 +55,7 @@ export class LocationService {
         where: { id },
         relations: {
           owner: true,
-          favBy: true,
+          favCharacters: true,
         },
       });
 

@@ -5,6 +5,15 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  
+  // Configurar para aceptar JSON por defecto
+  app.use((req, res, next) => {
+    if (!req.headers['content-type'] && req.method !== 'GET') {
+      req.headers['content-type'] = 'application/json';
+    }
+    next();
+  });
+
   app.useGlobalPipes(
     new ValidationPipe(
       {

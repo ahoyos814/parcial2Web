@@ -19,9 +19,9 @@ export class Character {
   employee: boolean;
 
   @OneToMany(() => Location, (location) => location.owner)
-  ownedProperties: Location[];
+  property: Location[];
 
-  @ManyToMany(() => Location, (location) => location.favBy)
+  @ManyToMany(() => Location, (location) => location.favCharacters)
   @JoinTable({
     name: 'character_favorites',
     joinColumn: {

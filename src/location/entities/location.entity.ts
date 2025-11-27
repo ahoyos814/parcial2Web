@@ -21,10 +21,10 @@ export class Location {
   @Column()
   ownerId: number;
 
-  @ManyToOne(() => Character, (character) => character.ownedProperties, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Character, (character) => character.property, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'ownerId' })
   owner: Character;
 
   @ManyToMany(() => Character, (character) => character.favPlaces)
-  favBy: Character[];
+  favCharacters: Character[];
 }
