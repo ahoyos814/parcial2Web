@@ -2,6 +2,7 @@ import { Injectable, Logger, BadRequestException, InternalServerErrorException, 
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Character } from './entities/character.entity';
+import { Location } from '../location/entities/location.entity';
 import { CreateCharacterDto } from './dto/create-character.dto';
 
 @Injectable()
@@ -11,6 +12,8 @@ export class CharacterService {
   constructor(
     @InjectRepository(Character)
     private readonly characterRepository: Repository<Character>,
+    @InjectRepository(Location)
+    private readonly locationRepository: Repository<Location>,
   ) {}
 
   async create(createCharacterDto: CreateCharacterDto) {
@@ -45,8 +48,38 @@ export class CharacterService {
 
   async addFavoritePlace(characterId: number, locationId: number) {
     try {
-      const character = await this.findOne(characterId);
-      // Por ahora solo retornamos mensaje
+      // Buscar el personaje con sus lugares favoritos actuales
+      const character = await this.characterRepository.findOne({
+        where: { id: characterId },
+        relations: ['favPlaces'],
+      });
+      
+      if (!character) {
+        throw new NotFoundException(`Personaje con ID ${characterId} no encontrado`);
+      }
+
+      // Buscar la ubicación
+      const location = await this.locationRepository.findOne({
+        where: { id: locationId },
+      });
+      
+      if (!location) {
+        throw new NotFoundException(`Ubicación con ID ${locationId} no encontrada`);
+      }
+
+      // Verificar si ya está en favoritos
+      const isAlreadyFavorite = character.favPlaces.some(place => place.id === locationId);
+      if (isAlreadyFavorite) {
+        return {
+          message: `La ubicación ${locationId} ya está en los favoritos del personaje ${characterId}`,
+          success: false,
+        };
+      }
+
+      // Agregar la ubicación a favoritos
+      character.favPlaces.push(location);
+      await this.characterRepository.save(character);
+
       return {
         message: `Se agrego la locacion ${locationId} como favorita del personaje ${characterId}`,
         success: true,
